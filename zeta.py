@@ -56,36 +56,47 @@ def bernoulli_sum(N, s):
 	return total
 
 
-def alternating_series(s, N):
+def dirichlet_eta(s, N):
 	'''
 		This is essentially the Euler transformation applied to Dirichlet eta. 
 	'''
 
-	def e_k(k):
-		total = 0.0
-		for j in range(k, N + 1):
-			total += comb(N, j)
-		return total
+	def calculate_d_k(k, n):
+
+		d_k_total = 0.0
+		
+		for i in range(k):
+			numerator = factorial( ( n + i - 1) ) * 4**i
+			denominator = factorial( n - i ) * factorial( 2*i )
+			summand = numerator / denominator
+			d_k_total += summand
+
+		return n * d_k_total
 
 
-	prefactor = 1 / ( 1 - 2**(1 - s))
+	d_n = calculate_d_k(N, N)
+
+	eta_total = 0.0
+	for k in range(N):
+		
+		d_k = calculate_d_k(k, N)
+
+		numerator = ( (-1)**k ) * (d_k - d_n)
+		denominator = (k + 1)**s
+
+		eta_total += numerator / denominator
 
 
-	first_term = 0.0	
+	eta_total = - eta_total / d_n
 
-	for k in range(1, N + 1):
-		first_term += ( (-1)**k ) / (k**s)
+	return eta_total
 
-	second_term = 0.0
-	for k in range( N + 1, 2*N + 1):
-		second_term +=  (1 / (2**N)) * ( (-1)**k ) * e_k(k) / (k**s)
-
-	zeta = first_term + second_term
-
-	zeta *= prefactor
+def alternating_series(s, N):
+	eta = dirichlet_eta(s, N)
+	denominator = 1 - 2**(1 - s)
+	zeta = eta / denominator
 
 	return zeta
-
 
 def zeta_function(s, N, method="euler"):
 
@@ -102,14 +113,14 @@ def zeta_function(s, N, method="euler"):
 
 	elif method == "alternating":
 		z = alternating_series(s, N)
-		return z
+	
 
 	return z
 	
 
 
-print zeta_function(s=1/2, N=4, method="euler")
-print zeta_function(s=1/2, N=50, method="alternating")
+print zeta_function(s=(1/2 + 5.j), N=4, method="euler")
+print zeta_function(s=1/2 + 5.j, N=50, method="alternating")
 
 
 
