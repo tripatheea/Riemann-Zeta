@@ -4,6 +4,8 @@ import math
 import matplotlib as mpl
 import numpy as np
 
+from time import time
+
 from scipy.misc import comb
 from scipy.misc import factorial 
 from scipy.special import gamma
@@ -97,6 +99,14 @@ def riem_sieg_gamma_function(s):
 	return (np.pi**(0.5 - s)) * (numerator / denominator)
 
 
+def riemann_siegel_theta(t):
+	first_term = np.angle( gamma( (2.j*t + 1) / 4) )
+	second_term = t * np.log(np.pi) / 2
+	
+	return first_term - second_term
+
+
+
 def riemann_siegel_formula(s, N):
 
 	M = 100
@@ -128,7 +138,30 @@ def zeta_function(s, N, method="euler"):
 		z = alternating_series(s, N)
 
 	return z
-	
-print zeta_function(s=(1/2 + 1000.j), N=100000, method="euler")
-# print zeta_function(s=1/2 + 1000.j, N=1000, method="alternating")
 
+
+def z_function(t, N=100000, method="euler"):
+	zeta = zeta_function(1/2 + (1.j)*t, N, method)
+
+	return np.real( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
+
+
+
+if __name__ == '__main__':
+	start = time()
+
+	# print zeta_function(s=(1/2 + 25.j), N=100000, method="euler")
+	print z_function(t=27.5, N=100000, method="euler")
+
+	end = time()
+
+	print "Calculated using Euler's method in {:.4f} seconds.".format(float(end - start))
+
+
+	start = time()
+
+	# print zeta_function(s=1/2 + 25.j, N=1000, method="alternating")
+
+	end = time()
+
+	print "Calculated using alternating series in {:.4f} seconds.".format(float(end - start))
