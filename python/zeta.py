@@ -6,6 +6,7 @@ import numpy as np
 
 from scipy.misc import comb
 from scipy.misc import factorial 
+from scipy.special import gamma
 
 
 def brute_force_sum(N, s):
@@ -62,9 +63,7 @@ def dirichlet_eta(s, N):
 	'''
 
 	def calculate_d_k(k, n):
-
 		d_k_total = 0.0
-		
 		for i in range(k):
 			numerator = factorial( ( n + i - 1) ) * 4**i
 			denominator = factorial( n - i ) * factorial( 2*i )
@@ -73,23 +72,17 @@ def dirichlet_eta(s, N):
 
 		return n * d_k_total
 
-
 	d_n = calculate_d_k(N, N)
 
 	eta_total = 0.0
 	for k in range(N):
-		
 		d_k = calculate_d_k(k, N)
-
 		numerator = ( (-1)**k ) * (d_k - d_n)
 		denominator = (k + 1)**s
-
 		eta_total += numerator / denominator
 
+	return  - (1 / d_n) * eta_total 
 
-	eta_total = - eta_total / d_n
-
-	return eta_total
 
 def alternating_series(s, N):
 	eta = dirichlet_eta(s, N)
@@ -98,68 +91,44 @@ def alternating_series(s, N):
 
 	return zeta
 
+def riem_sieg_gamma_function(s):
+	numerator = gamma( s / 2 )
+	denominator = gamma( (1 - s) / 2 )
+	return (np.pi**(0.5 - s)) * (numerator / denominator)
+
+
+def riemann_siegel_formula(s, N):
+
+	M = 100
+	N = 200
+
+	first_term = 0.0
+	for k in range(1, N):
+		first_term += 1 / (k**s)
+
+	second_term = 0.0
+	for k in range(1, M):
+		second_term += 1 / (k**(1 - s))
+
+	second_term = second_term * riem_sieg_gamma_function(1 - s)
+
+	zeta = first_term + second_term
+
+	return zeta
+
+
 def zeta_function(s, N, method="euler"):
-
 	z = 0.0
-
 	if method == "euler":
 		z = brute_force_sum(N=N, s=s)
-
 		z += bernoulli_sum(N=N, s=s)
-
 		z += (N**(1 - s)) / (s - 1)
-
 		z += 0.5 * N**(-s)
-
 	elif method == "alternating":
 		z = alternating_series(s, N)
-	
 
 	return z
 	
+print zeta_function(s=(1/2 + 1000.j), N=100000, method="euler")
+# print zeta_function(s=1/2 + 1000.j, N=1000, method="alternating")
 
-
-print zeta_function(s=(1/2 + 5.j), N=4, method="euler")
-print zeta_function(s=1/2 + 5.j, N=50, method="alternating")
-
-
-
-
-
-
-
-
-
-
-
-
-# def alternating_series(s, N):
-# 	'''
-# 		This is essentially the Euler transformation applied to Dirichlet eta. 
-# 	'''
-
-# 	def e_k(k):
-# 		total = 0.0
-# 		for j in range(k, N + 1):
-# 			total += comb(N, j)
-# 		return total
-
-
-# 	prefactor = 1 / ( 1 - 2**(1 - s))
-
-# 	# first_term = 0.0
-
-# 	zeta = 0.0
-
-# 	for k in range(1, N + 1):
-# 		first_term = ( (-1)**k ) / (k**s)
-
-# 		k2 = k + 1
-# 		second_term = ( (-1)**k2 ) * e_k(k2) / (k2**s)
-# 		second_term *= 1 / (2**N)
-
-# 		zeta += first_term + second_term
-
-# 	zeta *= prefactor
-
-# 	return zeta
