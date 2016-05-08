@@ -18,6 +18,35 @@ from scipy.special import zeta
 from scipy.misc import derivative
 
 
+def read_riemann_siegel_coeffs(filename):
+	f = open(filename, 'r')
+
+	lines = f.read().split("\n")
+
+	all_coeffs = []
+	for line in lines:
+		if len(line) != 0:
+			coeffs = [ float(c) for c in line.split(":")[1].split(",")]
+
+			all_coeffs.append(coeffs)
+
+	return all_coeffs
+
+def evaluate_riemann_siegel_C_s(p):
+	all_coeffs = read_riemann_siegel_coeffs('data/coeffs.dat')
+	results = []
+
+	for k in range(0, 4):
+		result = 0.0
+		for i in range(len(all_coeffs[k])):
+			result += all_coeffs[k][i] * p**i
+
+		results.append(result)
+
+	return results
+			
+
+
 
 def riemann_siegel_psi(p):	
 	return sp.cos( 2*np.pi * (p**2 - p - 1/16)) / sp.cos( 2*np.pi*p )
@@ -71,6 +100,13 @@ def get_riemann_siegel_C_s(p_value, order):
 
 
 
+def numeric_riemann_siegel_remainder(t):
+	R = 0.0
+	f = np.sqrt(t / (2 * np.pi))
+	N, p = int(f), abs( f - int(f) )	# The integer and fractional part of sqrt( t / 2pi ).
+
+	C_s = evaluate_riemann_siegel_C_s(p)
+
 def riemann_siegel_remainder(t, order=0):
 	R = 0.0
 
@@ -80,21 +116,29 @@ def riemann_siegel_remainder(t, order=0):
 
 	C_s = get_riemann_siegel_C_s(p, order)
 
-	R_s = []
-	R_s.append( C_s[0] )
-	R_s.append( C_s[1] * ((t / (2*np.pi))**(-1/2)) )
-	R_s.append( C_s[2] * ((t / (2*np.pi))**(-2/2)) )
-	R_s.append( C_s[2] * ((t / (2*np.pi))**(-3/2)) )
-	R_s.append( C_s[2] * ((t / (2*np.pi))**(-4/2)) )
+	all_coeffs = evaluate_riemann_siegel_C_s(p)
 
-	R_s = [ ((-1)**(N - 1)) * (f**(-1/2)) * C_s[i] * ((t / (2*np.pi))**(-i/2)) for i in range(0, 5)]
+	print C_s
 
-	print "The R's are:"
-	for i in range(len(R_s)):
-		print "R{} = {}".format(i, R_s[i])
+	print all_coeffs
+
+	# R_s = []
+	# R_s.append( C_s[0] )
+	# R_s.append( C_s[1] * ((t / (2*np.pi))**(-1/2)) )
+	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-2/2)) )
+	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-3/2)) )
+	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-4/2)) )
+
+	# R_s = [ ((-1)**(N - 1)) * (f**(-1/2)) * C_s[i] * ((t / (2*np.pi))**(-i/2)) for i in range(0, 5)]
+
+	# print "The R's are:"
+	# for i in range(len(R_s)):
+	# 	print "R{} = {}".format(i, R_s[i])
 
 
-	return sum(R_s)
+	# return sum(R_s)
+
+	return 5.0
 
 def riemann_siegel_theta(t):
 	first_term = np.angle( gamma( (2.j*t + 1) / 4) )
