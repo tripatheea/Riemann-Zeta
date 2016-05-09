@@ -17,7 +17,6 @@ from scipy.special import gamma
 from scipy.special import zeta
 from scipy.misc import derivative
 
-
 def read_riemann_siegel_coeffs(filename):
 	f = open(filename, 'r')
 
@@ -32,26 +31,31 @@ def read_riemann_siegel_coeffs(filename):
 
 	return all_coeffs
 
-def evaluate_riemann_siegel_C_s(p):
+def evaluate_riemann_siegel_C_series(p, order):
+
 	all_coeffs = read_riemann_siegel_coeffs('data/coeffs.dat')
 	results = []
 
-	for k in range(0, 4):
-		result = 0.0
-		for i in range(len(all_coeffs[k])):
-			result += all_coeffs[k][i] * p**i
+	if order >= 0:
+		results.append( sum( [ all_coeffs[0][i] * p**i for i in range(len(all_coeffs[0])) ] ) )
 
-		results.append(result)
+	if order >= 1:
+		results.append( sum( [ all_coeffs[1][i] * p**i for i in range(len(all_coeffs[1])) ] ) )
+
+	if order >= 2:
+		results.append( sum( [ all_coeffs[2][i] * p**i for i in range(len(all_coeffs[2])) ] ) )
+
+	if order >= 3:
+		results.append( sum( [ all_coeffs[3][i] * p**i for i in range(len(all_coeffs[3])) ] ) )
+
+	if order >= 4:
+		results.append( sum( [ all_coeffs[4][i] * p**i for i in range(len(all_coeffs[4])) ] ) )
+
+	while len(results) < 5:
+		results.append(0)
 
 	return results
 			
-
-
-
-def riemann_siegel_psi(p):	
-	return sp.cos( 2*np.pi * (p**2 - p - 1/16)) / sp.cos( 2*np.pi*p )
-
-
 
 def get_riemann_siegel_C_s(p_value, order):
 	
@@ -98,8 +102,6 @@ def get_riemann_siegel_C_s(p_value, order):
 
 	return C_s
 
-
-
 def numeric_riemann_siegel_remainder(t):
 	R = 0.0
 	f = np.sqrt(t / (2 * np.pi))
@@ -107,46 +109,32 @@ def numeric_riemann_siegel_remainder(t):
 
 	C_s = evaluate_riemann_siegel_C_s(p)
 
-def riemann_siegel_remainder(t, order=0):
-	R = 0.0
-
+def riemann_siegel_remainder(t, order=0, use_series_expansion=True):
+	
+	# f = sp.sqrt(t / (2 * sp.pi))
 	f = np.sqrt(t / (2 * np.pi))
 
 	N, p = int(f), abs( f - int(f) )	# The integer and fractional part of sqrt( t / 2pi ).
 
-	C_s = get_riemann_siegel_C_s(p, order)
-
-	all_coeffs = evaluate_riemann_siegel_C_s(p)
-
-	print C_s
-
-	print all_coeffs
-
-	# R_s = []
-	# R_s.append( C_s[0] )
-	# R_s.append( C_s[1] * ((t / (2*np.pi))**(-1/2)) )
-	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-2/2)) )
-	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-3/2)) )
-	# R_s.append( C_s[2] * ((t / (2*np.pi))**(-4/2)) )
-
-	# R_s = [ ((-1)**(N - 1)) * (f**(-1/2)) * C_s[i] * ((t / (2*np.pi))**(-i/2)) for i in range(0, 5)]
-
-	# print "The R's are:"
-	# for i in range(len(R_s)):
-	# 	print "R{} = {}".format(i, R_s[i])
-
-
-	# return sum(R_s)
-
-	return 5.0
-
+	if use_series_expansion:
+		C_s = evaluate_riemann_siegel_C_series(1 - 2*p, order)
+	else:
+		C_s = get_riemann_siegel_C_s(p, order)
+	
+	R_s = [ (f**(-1/2))*C_s[i] * f**(- i ) for i in range(len(C_s)) ]
+	
+	if (N - 1) % 2 == 1:
+		return - sum(R_s)
+	
+	return sum(R_s)
+	
 def riemann_siegel_theta(t):
 	first_term = np.angle( gamma( (2.j*t + 1) / 4) )
 	second_term = t * np.log(np.pi) / 2
 	
 	return first_term - second_term
 
-def z_function(t):
+def z_function(t, remainder_order=4, use_series_expansion=True):
 
 	upper_limit = math.floor( np.sqrt(t / (2 * np.pi)) )
 
@@ -158,7 +146,7 @@ def z_function(t):
 
 	z *= 2
 
-	remainder = riemann_siegel_remainder(t, order=4)
+	remainder = riemann_siegel_remainder(t, order=remainder_order, use_series_expansion=use_series_expansion)
 
 	z += remainder
 
@@ -174,4 +162,4 @@ def zeta_function(t):
 
 
 if __name__ == '__main__':
-	zeta_function(t=25)
+	z_function(t=18, remainder_order=4, use_series_expansion=True)
