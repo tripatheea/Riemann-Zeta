@@ -25,10 +25,6 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 
 
-# RootPy
-from rootpy.plotting import Hist, HistStack, Legend
-import rootpy.plotting.root2matplotlib as rplt
-from rootpy.plotting import Hist2D
 
 
 # Stuff for calculating areas.
@@ -53,10 +49,8 @@ from scipy import arange, array, exp
 
 from scipy.stats import binned_statistic
 
-import rootpy.plotting.views
-
-
-from random_matrices import *
+import random_matrices
+import qm
 
 
 
@@ -104,28 +98,35 @@ def plot_normalized_differences():
 	plt.gcf().set_size_inches(30, 24, forward=1)
 
 
-	plt.savefig("plots/normalized_differences.png")
+	plt.savefig("plots/normalized_differences.pdf")
 	plt.clf()
 
 def plot_zeros_and_eigenvalue_differences():
-	eigenvalue_differences = calculate_eigenvalues_differences(N=5, number_of_matrices=1000000)
-
-	print np.mean(eigenvalue_differences)
+	GOE_differences, GUE_differences = random_matrices.get_eigenvalues_differences(10, 10000)
 
 	zeros = np.array( parse_file("data/zeros_2M.dat") )
 
+	qm_eigenvalues = np.array( parse_file("data/qm.dat") )
+
 	normalized_zeros_differences = np.diff(zeros) * np.log(max(zeros) / (2 * np.pi)) / (2 * np.pi)
 
+	normalized_zeros_differences = normalized_zeros_differences / np.mean(normalized_zeros_differences)
+	
 
-	plt.hist(normalized_zeros_differences, color="red", label="Zeros Differences", bins=500, histtype='step', lw=5, edgecolor="red", normed=1)
+	plt.hist(normalized_zeros_differences, color="red", label="Zeros of $\zeta(t)$", bins=100, histtype='step', lw=5, edgecolor="red", normed=1)
 
-	plt.hist(eigenvalue_differences, color="blue", label="Eigenvalues Differences", bins=500, histtype='step', lw=5, edgecolor="blue", normed=1)
+	plt.hist(GOE_differences, color="blue", label="Gaussian Orthogonal Ensemble", bins=100, histtype='step', lw=5, edgecolor="blue", normed=1)
+	
+	plt.hist(GUE_differences, color="blue", label="Gaussian Unitrary Ensemble", bins=100, histtype='step', lw=5, edgecolor="orange", normed=1)
+
+	plt.hist(qm_eigenvalues, color="green", label="Berry's Hamiltonian Eigenvalues", bins=100, histtype='step', lw=5, edgecolor="green", normed=1)
 
 	plt.legend()
 
 	plt.autoscale()
 
 	plt.xlim(0, 3)
+	plt.ylim(0, 1.2*plt.gca().get_ylim()[1])
 	
 	plt.gcf().set_size_inches(30, 24, forward=1)
 
@@ -135,5 +136,7 @@ def plot_zeros_and_eigenvalue_differences():
 
 
 # plot_zeros()
+
+# plot_normalized_differences()
 
 plot_zeros_and_eigenvalue_differences()

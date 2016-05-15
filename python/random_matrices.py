@@ -25,11 +25,6 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 
 
-# RootPy
-from rootpy.plotting import Hist, HistStack, Legend
-import rootpy.plotting.root2matplotlib as rplt
-from rootpy.plotting import Hist2D
-
 
 # Stuff for calculating areas.
 from scipy.integrate import simps
@@ -53,8 +48,6 @@ from scipy import arange, array, exp
 
 from scipy.stats import binned_statistic
 
-import rootpy.plotting.views
-
 
 
 mpl.rcParams['axes.linewidth'] = 5.0 #set the value globally
@@ -66,42 +59,46 @@ plt.rc('font', family='serif', size=43)
 
 
 
-
-def generate_random_matrix(N):
+def generate_GOE_matrix(matrix_size):
 	
 
-	random_matrix = np.random.randn(N, N)
+	random_matrix = np.random.randn(matrix_size, matrix_size)
 	transpose = np.transpose(random_matrix)
 
+	return ( random_matrix + transpose ) / 2
 
-	return random_matrix + transpose
 
+def generate_GUE_matrix(matrix_size):
 	
 
-def generate_random_matrices(N, number_of_matrices):
+	random_matrix_real = np.matrix( np.random.randn(matrix_size, matrix_size) )
+	random_matrix_im = np.matrix( 1.j * np.random.randn(matrix_size, matrix_size) )
+
+	random_matrix = random_matrix_real + random_matrix_im
+
+	random_matrix_H = random_matrix.getH()
+
+
+	return ( random_matrix + random_matrix_H ) / 2
+
+
+
+def generate_matrix_ensemble(matrix_size, number_of_matrices, ensemble_type):
 	random_matrices = []
+
 	for i in range(number_of_matrices):
-		random_matrices.append( generate_random_matrix(N) )
+		
+		if ensemble_type == "GOE":
+			random_matrix = generate_GOE_matrix(matrix_size)
+		elif ensemble_type == "GUE":
+			random_matrix = generate_GUE_matrix(matrix_size)
+
+		random_matrices.append( random_matrix )
 
 	return random_matrices
 
 
-def probability_distribution(H):
-	N = np.shape(H)[0]
-	C_N = ((2 * np.pi)**( - (N * (N + 1)) / 2 )) * N**( (N**2) / 2 )
-	trace_H2 = np.trace( H*H )
 
-	weight = C_N * np.exp( - (N / 2) * trace_H2 )
-
-	return weight
-
-def weight_matrices(matrices):
-	weights = []
-	for matrix in matrices:
-		weight = probability_distribution(matrix)
-		weights.append(weight)
-
-	return weights
 
 def compute_eigenvalues(matrices):
 	all_eigenvalues = []
@@ -113,17 +110,19 @@ def compute_eigenvalues(matrices):
 
 
 
-def calculate_eigenvalues_differences(N, number_of_matrices):
-	random_matrices = generate_random_matrices(N, number_of_matrices)
-	# weights = weight_matrices(random_matrices)
-	all_eigenvalues = compute_eigenvalues(random_matrices)
+def calculate_eigenvalues_differences(matrices):
+	
+	matrix_size = np.sqrt( matrices[0].size )
+
+	
+	all_eigenvalues = compute_eigenvalues(matrices)
 
 	# flatten_eigenvalues = sorted( np.ndarray.flatten( np.array( all_eigenvalues ) ) )
-	# flatten_eigenvalues = sorted([eigenvalues[int(N / 2)] for eigenvalues in all_eigenvalues] )
+	# flatten_eigenvalues = sorted([eigenvalues[int(matrix_size / 2)] for eigenvalues in all_eigenvalues] )
 	# eigenvalues_differences = ( np.diff(flatten_eigenvalues) )
-	eigenvalues_differences = [ eigenvalues[int(N / 2) + 1] - eigenvalues[int(N / 2)] for eigenvalues in all_eigenvalues ]
+	eigenvalues_differences = [ eigenvalues[int(matrix_size / 2) + 1] - eigenvalues[int(matrix_size / 2)] for eigenvalues in all_eigenvalues ]
 
-	# expanded_weights = np.ndarray.flatten( np.array( [ [np.real(weight)]*N for weight in weights ] ) )
+	# expanded_weights = np.ndarray.flatten( np.array( [ [np.real(weight)]*matrix_size for weight in weights ] ) )
 
 
 
@@ -135,9 +134,12 @@ def calculate_eigenvalues_differences(N, number_of_matrices):
 	return normalized_eigenvalues_differences
 	
 
+def plot_normalized_differences(matrix_size, number_of_matrices, ensemble_type="GOE"):
 
-def plot_normalized_differences(N, number_of_matrices):
-	differences = calculate_eigenvalues_differences(N, number_of_matrices)
+	random_matrices = generate_matrix_ensemble(matrix_size, number_of_matrices, ensemble_type)
+
+
+	differences = calculate_eigenvalues_differences(random_matrices)
 
 
 	plt.hist(differences, color="red", lw=5, edgecolor="red", bins=500, normed=1)
@@ -149,9 +151,60 @@ def plot_normalized_differences(N, number_of_matrices):
 	plt.gcf().set_size_inches(30, 24, forward=1)
 
 
-	plt.savefig("plots/eigenvalues_differences.pdf")
+	plt.savefig("plots/" + str(ensemble_type) + "_eigenvalues_differences.pdf")
 	plt.clf()
 
 
+
+def get_eigenvalues_differences(matrix_size, number_of_matrices):
+
+	GOE_differences, GUE_differences = [], []
+
+	for i in range(number_of_matrices):
+		random_GOE_matrix = generate_GOE_matrix(matrix_size)
+		random_GUE_matrix = generate_GUE_matrix(matrix_size)
+
+		# Calculate eigenvalues.
+		GOE_eigenvalues = sorted( np.linalg.eigvalsh(random_GOE_matrix) )
+		GUE_eigenvalues = sorted( np.linalg.eigvalsh(random_GUE_matrix) )
+
+		GOE_differences.append( GOE_eigenvalues[int(matrix_size / 2) + 1] - GOE_eigenvalues[int(matrix_size / 2)] )
+		GUE_differences.append( GUE_eigenvalues[int(matrix_size / 2) + 1] - GUE_eigenvalues[int(matrix_size / 2)] )
+
+	GOE_normed_differences = GOE_differences / np.mean(GOE_differences)
+	GUE_normed_differences = GUE_differences / np.mean(GUE_differences)
+
+	return [GOE_normed_differences, GUE_normed_differences]	
+
+
+
+
+
+def plot_eigenvalues_differences(matrix_size, number_of_matrices):
+
+	
+	GOE_differences, GUE_differences = get_eigenvalues_differences(matrix_size, number_of_matrices)
+
+	plt.hist(GOE_differences, color="red", lw=5, histtype='step', edgecolor="red", bins=50, normed=1, label="Gaussian Orthogonal Ensemble")
+	plt.hist(GUE_differences, color="blue", lw=5, histtype='step', edgecolor="blue", bins=50, normed=1, label="Gaussian Unitary Ensemble")
+
+
+	plt.legend()
+
+
+	plt.autoscale()
+
+	plt.xlim(0, 3)
+	
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+
+	plt.savefig("plots/eigenvalues_differences.pdf")
+	plt.clf()
+	
+
+
+
 if __name__ == '__main__':
-	plot_normalized_differences(N=50, number_of_matrices=100000)
+	# plot_normalized_differences(N=50, number_of_matrices=10000, ensemble_type="GOE")
+	plot_eigenvalues_differences(matrix_size=20, number_of_matrices=100000)

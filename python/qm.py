@@ -28,12 +28,6 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 
 
-# RootPy
-from rootpy.plotting import Hist, HistStack, Legend
-import rootpy.plotting.root2matplotlib as rplt
-from rootpy.plotting import Hist2D
-
-
 # Stuff for calculating areas.
 from scipy.integrate import simps
 from scipy import interpolate
@@ -56,7 +50,6 @@ from scipy import arange, array, exp
 
 from scipy.stats import binned_statistic
 
-import rootpy.plotting.views
 
 import sympy as sp
 
@@ -78,7 +71,8 @@ mpl.rcParams['text.latex.preamble'] = [r'\boldmath']
 plt.rc('font', family='serif', size=43)
 
 
-def construct_operators(n):
+
+def get_eigenvalues(n):
 	# Construct creation operator first.
 	a_creation = np.zeros((n, n))
 	for i in range(n):
@@ -95,22 +89,38 @@ def construct_operators(n):
 
 	# print berry_H
 
-	eigenvalues = sorted( list(set(np.absolute(np.array(sorted(np.linalg.eigvalsh(berry_H)))))) )
-	# print eigenvalues
+	eigenvalues = sorted(np.linalg.eigvalsh(berry_H))
 
+
+	return eigenvalues
+
+def get_eigenvalue_differences(n):
+	
+	eigenvalues = get_eigenvalues(n)
 
 	normalized_differences = np.diff(eigenvalues)
 	normalized_differences *= 1 / np.mean(normalized_differences)
 
-	filtered_differences = [f for f in normalized_differences if f > 1e-6]
-
-	normalized_differences = filtered_differences
+	return normalized_differences
 
 
-	plt.hist(normalized_differences, color="red", bins=100, lw=5, edgecolor="red", normed=1)
+def construct_operators(n):
+	
+	normalized_differences = get_eigenvalue_differences(n)
+
+	
+	plt.hist(normalized_differences, color="red", bins=100, lw=5, histtype='step', edgecolor="red", normed=1)
 
 	plt.autoscale()
 	plt.xlim(0, 3)
+
+	plt.gca().xaxis.set_minor_locator(MultipleLocator(0.1))
+	plt.gca().yaxis.set_minor_locator(MultipleLocator(0.1))
+	
+	plt.tick_params(which='major', width=5, length=25, labelsize=70)
+	plt.tick_params(which='minor', width=3, length=15)
+
+
 
 	plt.xlabel("Normalized Zero Difference", labelpad=50)
 	plt.ylabel("Normalized Frequency", labelpad=50)
@@ -121,7 +131,143 @@ def construct_operators(n):
 	plt.savefig("plots/qm.pdf")
 	plt.clf()
 	
+	return normalized_differences
+
+def write_eigenvalues(filename, eigenvalues):
+	f = open(filename, "w")
+	for eigenvalue in eigenvalues:
+		f.write(str(eigenvalue) + "\n")
+
+	f.close()
+
+
+
+def write_min_eigenvalue_diff_vs_N():
+
+	n_range = range(1000, 2000)
+
+	f = open("data/min_difference.dat", "a")
+
+	for N in n_range:
+		minimum = min(get_eigenvalue_differences(N))
+		f.write("{},{}\n".format(N, minimum))
+
+	f.close()
+
+
+
+
+
+def read_min_vs_N():
+	f = open("data/min_difference.dat", "r")
+
+	lines = f.read().split("\n")
+
+	N_s, mins = [], []
+	for line in lines:
+		if len(line) != 0:
+			content = line.split(",")
+			N_s.append( int( content[0] ) )
+			mins.append( float( content[1] ) )
+
+	
+	return N_s, mins
+
+
+def plot_min_vs_N():
+
+	max_N = 100
+
+	N_s, mins = read_min_vs_N()
+
+	N_s, mins = N_s[:max_N], mins[:max_N]
+	
+	plt.plot(N_s, mins, color="black", lw=5)
+	# plt.hist(N_s, weights=mins, bins=100, color="purple", histtype='step', lw=5, normed=True)
+
+	# plt.xscale('log')
+
+	# plt.autoscale()
+
+	plt.xlim(5, max_N)
+	plt.ylim(0, plt.ylim()[1])
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.savefig("plots/min.pdf")
+	plt.clf()
+
+
+def plot_max_eigenvalue_vs_N():
+	N_s = []
+
+	max_s = []
+
+	for i in range(5, 100):
+		N_s.append(i)
+		max_s.append( max(get_eigenvalues(i)) )
+
+	plt.plot(N_s, max_s, lw=5, color="green")
+
+	plt.autoscale()
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.savefig("plots/max_eigenvalues.pdf")
+	plt.clf()
+
+
+def plot_min_eigenvalue_vs_N():
+	N_s = []
+
+	max_s = []
+
+	for i in range(5, 100):
+		N_s.append(i)
+		max_s.append( min(np.abs(get_eigenvalues(i)) ) )
+
+	plt.plot(N_s, max_s, lw=5, color="green")
+
+	plt.autoscale()
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.savefig("plots/min_eigenvalues.pdf")
+	plt.clf()
+
+
+
+def plot_max_eigenvalue_diff_vs_N():
+	N_s = []
+
+	max_s = []
+
+	for i in range(5, 100):
+		N_s.append(i)
+		max_s.append( max(get_eigenvalue_differences(i)) )
+
+	plt.plot(N_s, max_s, lw=5, color="green")
+
+	plt.autoscale()
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.savefig("plots/max_eigenvalue_diff.pdf")
+	plt.clf()
+
 
 
 if __name__ == '__main__':
-	construct_operators(n=10000)
+	# eigenvalues = get_eigenvalue_differences(n=1000)
+	# write_eigenvalues("data/qm.dat", eigenvalues)
+
+	# plot_
+	
+	# write_min_eigenvalue_diff_vs_N()
+
+	# plot_min_vs_N()
+
+	# plot_max_eigenvalue_vs_N()
+
+	# plot_max_eigenvalue_diff_vs_N()
+	plot_min_eigenvalue_vs_N()

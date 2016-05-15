@@ -1,21 +1,13 @@
 from __future__ import division
 
 import math
-import matplotlib as mpl
+
 import numpy as np
-
-
 
 import sympy as sp
 
-
-
-from scipy.misc import comb
-from scipy.misc import factorial 
 from scipy.special import gamma
 
-from scipy.special import zeta
-from scipy.misc import derivative
 
 def read_riemann_siegel_coeffs(filename):
 	f = open(filename, 'r')
@@ -150,10 +142,12 @@ def z_function(t, remainder_order=4, use_series_expansion=True):
 
 	z += remainder
 
-	print "Z({}) = {}".format(t, z)
+	# print "Z({}) = {}".format(t, z)
 	
 	return z
 
+def calculate_z(t):	# Convenient wrapper to use for roots.py
+	return z_function(t, remainder_order=4, use_series_expansion=True)
 
 def zeta_function(t):
 	z = z_function(t)

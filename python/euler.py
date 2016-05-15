@@ -10,6 +10,8 @@ from scipy.misc import comb
 from scipy.misc import factorial 
 from scipy.special import gamma
 
+import mpmath as mp
+
 
 def brute_force_sum(N, s):
 	total = 0.0
@@ -88,8 +90,10 @@ def zeta_function(s, N):
 def z_function(t, N=100000):
 	zeta = zeta_function(1/2 + (1.j)*t, N)
 
-	return np.real( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
+	return mp.re( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
 
+def calculate_z(t):	# Convenient wrapper to use for roots.py
+	return z_function(t, N=1000)
 
 
 if __name__ == '__main__':

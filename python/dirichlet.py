@@ -5,22 +5,48 @@ import numpy as np
 
 from time import time
 
-from scipy.misc import comb
+import sympy as sp
+
+import mpmath as mp
+
+from mpmath.ctx_mp_python import mpf
+
 from scipy.misc import factorial 
 from scipy.special import gamma
 
+precision = 53
+mp.prec = precision
+mp.pretty = True
+
+
+def calculate_factorial_ratio(n, i):
+	# This function calculates (n + i - 1)! / (n - i)!
+	
+	mp.dps = 50
+
+	k = (n - i)
+
+	result = 1
+	for j in range(k + 2*i - 1, k, -1):
+		result = mp.fmul(result, j)
+
+	return result
 
 def dirichlet_eta(s, N):
 	'''
 		This is essentially the Euler transformation applied to Dirichlet eta. 
 	'''
 
+	mp.dps = 50
+
 	def calculate_d_k(k, n):
-		d_k_total = 0.0
+		d_k_total = mpf(0.0)
 		for i in range(k):
-			numerator = factorial( ( n + i - 1) ) * 4**i
-			denominator = factorial( n - i ) * factorial( 2*i )
-			summand = numerator / denominator
+			# numerator = factorial( ( n + i - 1) ) * 4**i
+			# denominator = factorial( n - i ) * factorial( 2*i )
+			# summand = numerator / denominator
+			summand = (calculate_factorial_ratio(n, i) * (4**i)) / factorial(2 * i)
+			
 			d_k_total += summand
 
 		return n * d_k_total
@@ -57,14 +83,21 @@ def zeta_function(s, N):
 def z_function(t, N=100000):
 	zeta = zeta_function(1/2 + (1.j)*t, N)
 
-	return np.real( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
+	return mp.re( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
+
+def calculate_z(t):	# Convenient wrapper to use for roots.py
+	return z_function(t, N=25)
 
 if __name__ == '__main__':
 
 	start = time()
 
 	# print zeta_function(s=1/2 + 25.j, N=1000)
-	print z_function(t=18, N=100)
+	# print z_function(t=18, N=100)
+
+	eta = dirichlet_eta(1, N=25)
+	print eta
+	print abs(eta - np.log(2))
 
 	end = time()
 
