@@ -93,7 +93,7 @@ def z_function(t, N=100000):
 	return mp.re( np.exp( 1.j * riemann_siegel_theta(t) ) * zeta )
 
 def calculate_z(t):	# Convenient wrapper to use for roots.py
-	return z_function(t, N=1000)
+	return z_function(t, N=10000)
 
 
 if __name__ == '__main__':

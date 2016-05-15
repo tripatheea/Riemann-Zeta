@@ -98,8 +98,10 @@ def get_eigenvalue_differences(n):
 	
 	eigenvalues = get_eigenvalues(n)
 
+	print eigenvalues
+
 	normalized_differences = np.diff(eigenvalues)
-	normalized_differences *= 1 / np.mean(normalized_differences)
+	# normalized_differences *= 1 / np.mean(normalized_differences)
 
 	return normalized_differences
 
@@ -158,8 +160,8 @@ def write_min_eigenvalue_diff_vs_N():
 
 
 
-def read_min_vs_N():
-	f = open("data/min_difference.dat", "r")
+def read_min_eigenvalues_differences_vs_N():
+	f = open("data/min_differences.dat", "r")
 
 	lines = f.read().split("\n")
 
@@ -174,27 +176,37 @@ def read_min_vs_N():
 	return N_s, mins
 
 
-def plot_min_vs_N():
+def plot_min_eigenvalues_differences_vs_N():
 
-	max_N = 100
+	max_N = 200
 
-	N_s, mins = read_min_vs_N()
+	N_s, mins = read_min_eigenvalues_differences_vs_N()
 
 	N_s, mins = N_s[:max_N], mins[:max_N]
-	
-	plt.plot(N_s, mins, color="black", lw=5)
+
+	plt.plot(N_s, mins, color="orange", lw=5)
 	# plt.hist(N_s, weights=mins, bins=100, color="purple", histtype='step', lw=5, normed=True)
 
 	# plt.xscale('log')
 
 	# plt.autoscale()
 
-	plt.xlim(5, max_N)
+	plt.xlabel("Matrix Size, $N$", labelpad=30, fontsize=70)
+	plt.ylabel("Min. Eigenvalue Difference", labelpad=30, fontsize=70)
+
+	plt.xlim(0, max_N)
 	plt.ylim(0, plt.ylim()[1])
+
+	plt.gca().xaxis.set_minor_locator(MultipleLocator(10))
+	plt.gca().yaxis.set_minor_locator(MultipleLocator(0.02))
+	
+	plt.tick_params(which='major', width=5, length=25, labelsize=70)
+	plt.tick_params(which='minor', width=3, length=15)
 
 	plt.gcf().set_size_inches(30, 24, forward=1)
 
-	plt.savefig("plots/min.pdf")
+	plt.grid()
+	plt.savefig("plots/qm_min_eigenvalues_differences.pdf")
 	plt.clf()
 
 
@@ -217,26 +229,6 @@ def plot_max_eigenvalue_vs_N():
 	plt.clf()
 
 
-def plot_min_eigenvalue_vs_N():
-	N_s = []
-
-	max_s = []
-
-	for i in range(5, 100):
-		N_s.append(i)
-		max_s.append( min(np.abs(get_eigenvalues(i)) ) )
-
-	plt.plot(N_s, max_s, lw=5, color="green")
-
-	plt.autoscale()
-
-	plt.gcf().set_size_inches(30, 24, forward=1)
-
-	plt.savefig("plots/min_eigenvalues.pdf")
-	plt.clf()
-
-
-
 def plot_max_eigenvalue_diff_vs_N():
 	N_s = []
 
@@ -256,6 +248,73 @@ def plot_max_eigenvalue_diff_vs_N():
 	plt.clf()
 
 
+def plot_min_eigenvalue_vs_N():
+	N_s = []
+
+	minimum_eigenvalues = []
+
+	for i in range(5, 101):
+		N_s.append(i)
+		minimum_eigenvalues.append( min([ l for l in np.abs(get_eigenvalues(i)) if l > 1e-5  ] ) )
+
+	plt.plot(N_s, minimum_eigenvalues, lw=5, color="green")
+	
+	plt.xlabel("Matrix Size, $N$", labelpad=30, fontsize=70)
+	plt.ylabel("Min. Eigenvalue", labelpad=30, fontsize=70)
+
+	plt.autoscale()
+
+	plt.gca().xaxis.set_minor_locator(MultipleLocator(10))
+	plt.gca().yaxis.set_minor_locator(MultipleLocator(0.05))
+	
+	plt.tick_params(which='major', width=5, length=25, labelsize=70)
+	plt.tick_params(which='minor', width=3, length=15)
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.savefig("plots/qm_min_eigenvalues.pdf")
+	plt.clf()
+
+
+
+
+
+
+def plot_qm_eigenvalues():
+
+
+
+	plt.hist(get_eigenvalues(100), label="N = 100", bins=20, color="red", edgecolor='red', histtype='step', lw=5, normed=1)
+	plt.hist(get_eigenvalues(200), label="N = 200", bins=50, color="blue", edgecolor='blue', histtype='step', lw=5, normed=1)
+	plt.hist(get_eigenvalues(500), label="N = 500", bins=50, color="green", edgecolor='green', histtype='step', lw=5, normed=1)
+	
+
+	# plt.xscale('log')
+
+	# plt.autoscale()
+
+	plt.xlabel("Eigenvalues", labelpad=30, fontsize=70)
+	
+	plt.legend()
+
+	# plt.xlim(0, max_N)
+	plt.ylim(0, plt.ylim()[1] * 1.2)
+
+	plt.gca().xaxis.set_minor_locator(MultipleLocator(100))
+	plt.gca().yaxis.set_minor_locator(MultipleLocator(0.00025))
+	
+	plt.tick_params(which='major', width=5, length=25, labelsize=70)
+	plt.tick_params(which='minor', width=3, length=15)
+
+	plt.gcf().set_size_inches(30, 24, forward=1)
+
+	plt.grid()
+	plt.savefig("plots/qm_eigenvalues.pdf")
+	plt.clf()
+
+
+
+
 
 if __name__ == '__main__':
 	# eigenvalues = get_eigenvalue_differences(n=1000)
@@ -270,4 +329,8 @@ if __name__ == '__main__':
 	# plot_max_eigenvalue_vs_N()
 
 	# plot_max_eigenvalue_diff_vs_N()
-	plot_min_eigenvalue_vs_N()
+	# plot_min_eigenvalue_vs_N()
+
+	plot_min_eigenvalues_differences_vs_N()
+
+	# plot_qm_eigenvalues()

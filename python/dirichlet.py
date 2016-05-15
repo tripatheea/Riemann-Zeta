@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
 	start = time()
 
-	eta = dirichlet_eta((1, N=25)
+	eta = dirichlet_eta(1, N=25)
 	print eta
 	print abs(eta - np.log(2))
 
