@@ -32,35 +32,41 @@ def calculate_factorial_ratio(n, i):
 
 	return result
 
+def n_choose_k(n, k):
+	
+	j = n - k
+
+	numerator = 1
+	for i in range(1, k + 1):
+		numerator *= (j + i)
+
+	denominator = factorial(k)
+
+	return numerator / denominator
+
 def dirichlet_eta(s, N):
-	'''
-		This is essentially the Euler transformation applied to Dirichlet eta. 
-	'''
 
-	mp.dps = 50
+	def calculate_d_n(n):
+		total = 0.0
+		for k in range(n + 1):
+			if k % 2 == 0:
+				alternating_factor = 1
+			else:
+				alternating_factor = -1
 
-	def calculate_d_k(k, n):
-		d_k_total = mpf(0.0)
-		for i in range(k):
-			# numerator = factorial( ( n + i - 1) ) * 4**i
-			# denominator = factorial( n - i ) * factorial( 2*i )
-			# summand = numerator / denominator
-			summand = (calculate_factorial_ratio(n, i) * (4**i)) / factorial(2 * i)
-			
-			d_k_total += summand
+			total += alternating_factor * n_choose_k(n, k) / ( k + 1)**s
+		return total
 
-		return n * d_k_total
+	eta = 0.0
+	for n in range(N + 1):
+		d_n = calculate_d_n(n)
+		eta += d_n / (2**(n + 1))
 
-	d_n = calculate_d_k(N, N)
+	return eta
 
-	eta_total = 0.0
-	for k in range(N):
-		d_k = calculate_d_k(k, N)
-		numerator = ( (-1)**k ) * (d_k - d_n)
-		denominator = (k + 1)**s
-		eta_total += numerator / denominator
 
-	return  - (1 / d_n) * eta_total 
+
+
 
 def alternating_series(s, N):
 	eta = dirichlet_eta(s, N)
@@ -90,12 +96,13 @@ def calculate_z(t):	# Convenient wrapper to use for roots.py
 
 if __name__ == '__main__':
 
-	start = time()
 
 	# print zeta_function(s=1/2 + 25.j, N=1000)
 	# print z_function(t=18, N=100)
 
-	eta = dirichlet_eta(1, N=25)
+	start = time()
+
+	eta = dirichlet_eta((1, N=25)
 	print eta
 	print abs(eta - np.log(2))
 

@@ -1,0 +1,214 @@
+%-----------------------------------------------------------------------
+% Beginning of article-template.tex
+%-----------------------------------------------------------------------
+%
+%    This is a template file for proceedings articles prepared with AMS
+%    author packages, for use with AMS-LaTeX.
+%
+%    Templates for various common text, math and figure elements are
+%    given following the \end{document} line.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%    Remove any commented or uncommented macros you do not use.
+
+%    Replace amsproc by the name of the author package.
+\documentclass{amsproc}
+
+%    If you need symbols beyond the basic set, uncomment this command.
+%\usepackage{amssymb}
+
+%    If your article includes graphics, uncomment this command.
+%\usepackage{graphicx}
+
+%    If the article includes commutative diagrams, ...
+%\usepackage[cmtip,all]{xy}
+
+%    Include other referenced packages here.
+\usepackage{}
+
+
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+%    Update the information and uncomment if AMS is not the copyright
+%    holder.
+%\copyrightinfo{2009}{American Mathematical Society}
+
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+
+\newcommand{\ben}{\begin{equation*}}
+\newcommand{\een}{\end{equation*}}
+
+\newcommand{\ba}{\begin{align}}
+\newcommand{\ea}{\end{align}}
+
+\newcommand{\ban}{\begin{align*}}
+\newcommand{\ean}{\end{align*}}
+
+\newcommand{\df}{\; \mathrm{d}}
+
+
+
+
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+\definecolor{darkred}{rgb}{0.5,0,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{orange}{rgb}{0.9,0.58,0}
+
+\newcommand{\at}[1]{\textbf{\textcolor{orange}{(#1 --at)}}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{xca}[theorem]{Exercise}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\numberwithin{equation}{section}
+
+\begin{document}
+
+% \title[short text for running head]{full title}
+\title{Numerical Computation of the Roots of the Riemann Zeta Function}
+
+%    Only \author and \address are required; other information is
+%    optional.  Remove any unused author tags.
+
+%    author one information
+% \author[short version for running head]{name for top of paper}
+\author{Aashish Tripathee}
+\address{}
+\curraddr{}
+\email{aashisht@mit.edu}
+\thanks{}
+
+
+
+\subjclass[2000]{Primary }
+%    The 2010 edition of the Mathematics Subject Classification is
+%    now available.  If you are citing a classification from the
+%    new scheme, use the following input coding instead.
+%\subjclass[2010]{Primary }
+
+\date{}
+
+\begin{abstract}
+\end{abstract}
+
+
+
+\maketitle
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%    Templates for common elements of an article; for additional
+%    information, see the AMS-LaTeX instructions manual, instr-l.pdf,
+%    included in every AMS author package, and the amsthm user's guide,
+%    linked from http://www.ams.org/tex/amslatex.html .
+
+%    Section headings
+\section{Numerical Algorithms}
+\subsection{Euler-Maclaurin Formula}
+The Euler-Maclaurin formula is a very common and powerful tool used in numerical analysis as a connection between integrals and sums. It can be expressed to reformulate an integral as a sum (or vice versa) and is very popular in number theory to compute sums as integrals. It was developed in the early eighteenth century and came as a result of trying to extend the sum $\sum_{k} n^k$ for $k$'s other than 1. The formula is simply,
+
+\begin{align}
+\sum_{n = M}^{N} f(n) = &\int_M^N f(x) \df x + \frac{1}{2} \left[ f(N) - f(M) \right] + \\
+&\sum_{j = 1}^{\nu} \frac{B_{2j}}{ (2j)! } \left[ f^{( 2j - 1)}(N) - f^{(2j - 1)} (M) \right] + R
+\end{align}
+
+The remainder $R$ is very small for suitable values of $p$ and so we'll ignore it. \at{Maybe define the error term?}. 
+
+If we naively apply the Euler-Maclaurin formula to $\zeta(s) = \sum_{1}^{\infty} n^{-s}$, $R$ is not small enough to be ignored. So, we instead consider applying the formula to the sum, $\sum_{N}^{\infty} n^{-s}$. Notice that,
+\begin{align*}
+ \sum_{n = 1}^{\infty} n^{-s} - \sum_{n = 1}^{N - 1} n^{-s} &= \sum_{N}^{\infty} n^{-s} \\
+ \zeta(s) - \sum_{n = 1}^{N - 1} n^{-s} &= \sum_{N}^{\infty} n^{-s} 
+\end{align*}
+
+\be
+\label{eqn:euler_main}
+\zeta(s)  = \sum_{n = 1}^{N - 1} n^{-s} + \sum_{N}^{\infty} n^{-s} = \sum_{n = 1}^{N - 1} n^{-s} + \chi(s)
+\ee
+
+The first term is easy to compute and we can use the Euler-Maclaurin formula to compute $\chi(s)$. That gives us,
+
+\begin{align*}
+\chi(s) &= \int_N^{\infty} x^{-s} \df x + \frac{1}{2} N^{-s} + \sum_{j = 1}^{\nu} \frac{B_{2j}}{ (2j)! } \left[ - (n^{-s})^{(2j - 1)} (N) \right] + R \\
+& \approx \frac{1}{s - 1} N^{1 - s} \df x + \frac{1}{2} N^{-s} + \frac{B_2}{2} s N^{-s - 1} + \ldots + \left[ \frac{B_{2 \nu}}{ (2\nu)! } s(s + 1)  \ldots (s + 2 \nu - 2) N^{( -s - 2\nu + 1)} \right]
+\end{align*}
+
+This is the formula we're going to use to compute $\zeta(s)$. It contains two parts- one, calculating a regular sum and another that involves using Bernouli's numbers. This is very easy to implement and has been done in Section. \ref{}. The sum can therefore be divided into four different parts, defined as follows. This is what's used in the implementation in Section. \ref{}.
+
+\subsection{Alternating Series}
+
+Consider the following sum:
+\be
+\label{eqn:alternating_series}
+\eta(s) = \sum_{n = 1}^{\infty} \frac{ (-1)^{n - 1} }{n^s} = \frac{1}{1^s} - \frac{1}{2^s} + \frac{1}{3^s} - \frac{1}{4^s} + \ldots
+\ee
+Comparing this to,
+\begin{equation*}
+ \zeta(s) = \sum_{n = 1}^{\infty} n^{-s} = \frac{1}{1^s} + \frac{1}{2^s} + \frac{1}{3^s} + \frac{1}{4^s} + \ldots
+\end{equation*}
+it's clear that,
+\be
+\eta(s) = \left( 1 - 2^{1 - s} \right) \zeta(s) \;.
+\ee
+$\eta(s)$ is called the Dirichlet eta function, sometimes also called the alternating zeta function as it's the same sum as zeta function except each terms alternates its sign. This means that if we can find a way to evaluate $\eta(s)$, we can evaluate $\zeta(s)$ using that. There are many representations of the $\eta$ function, but the one of particular interest to our purpose is to consider Euler's transformation of alternating series to the alternating series defined in Equation \ref{eqn:alternating_series}. The Euler transform is defined as,
+\be
+\sum_{n = 0}^{\infty} (-1)^n a_n = \sum_{n = 0}^{\infty} (-1)^n a_0 \frac{ 1 }{2^{n + 1}} \Delta^n \;,
+\ee
+where $\Delta^n$ is the $n^{\mathrm{th}}$-order forward difference given by,
+\begin{equation*}
+ \Delta^n[f](x) = \sum_{k = 0}^{n} {n \choose k} (-1)^{n - k} f(x + k)
+\end{equation*}
+Comparing it to $\eta(s) = \sum_{n = 1}^{\infty} \frac{ (-1)^{n - 1} }{n^s} = \sum_{n = 0}^{\infty} \frac{ (-1)^n }{ (n + 1)^s }$, it's clear that,
+\begin{align*}
+\eta(s) &= \sum_{n=0}^{\infty} (-1)^n 1^{-s} \frac{1}{ 2^{n + 1} } \Delta^n \\
+        &= \sum_{n=0}^{\infty} (-1)^n 1^{-s} \frac{1}{ 2^{n + 1} } \sum_{k=0}^{n} {n \choose k} \frac{ (-1)^n }{ (-1)^k } \frac{1}{ (k + 1)^s } \\
+        &= \sum_{n=0}^{\infty} \frac{1}{ 2^{n + 1} } \sum_{k=0}^{n} {n \choose k} \frac{ (-1)^k }{ (k + 1)^s }
+\end{align*}
+This sum converges much faster than the original sum and so, is much more efficient to calculate $\eta(s)$. The code that implements this can be found in Section. \ref{}. 
+
+\subsection{Riemann-Siegel Formula}
+
+%    Ordinary theorem and proof
+%\begin{theorem}[Optional addition to theorem head]
+% text of theorem
+%\end{theorem}
+
+%\begin{proof}[Optional replacement proof heading]
+% text of proof
+%\end{proof}
+
+%    Figure insertion; default placement is top; if the figure occupies
+%    more than 75% of a page, the [p] option should be specified.
+%\begin{figure}
+%\includegraphics{filename}
+%\caption{text of caption}
+%\label{}
+%\end{figure}
+
+
+%    Text of article.
+
+%    Bibliographies can be prepared with BibTeX using amsplain,
+%    amsalpha, or (for "historical" overviews) natbib style.
+\bibliographystyle{amsplain}
+%    Insert the bibliography data here.
+
+\end{document}
+
+%-----------------------------------------------------------------------
+% End of article-template.tex
+%-----------------------------------------------------------------------
