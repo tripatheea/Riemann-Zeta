@@ -39,12 +39,12 @@ def calculate_bernoulli_numbers():
 	return bernoulli_numbers
 
 
-def bernoulli_sum(N, s):
+def bernoulli_sum(N, s, v_max=10):
 	total = 0.0
 
 	bernoulli_numbers = calculate_bernoulli_numbers()
 
-	v_max = 10
+	
 
 	for v in range(1, v_max + 1):
 		B_2v = bernoulli_numbers[ 2 * v ]
@@ -77,10 +77,10 @@ def riemann_siegel_theta(t):
 
 
 
-def zeta_function(s, N):
+def zeta_function(s, N, v_max=10):
 
 	z = brute_force_sum(N=N, s=s)
-	z += bernoulli_sum(N=N, s=s)
+	z += bernoulli_sum(N=N, s=s, v_max=v_max)
 	z += (N**(1 - s)) / (s - 1)
 	z += 0.5 * N**(-s)
 	

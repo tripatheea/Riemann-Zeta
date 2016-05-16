@@ -47,11 +47,15 @@ from scipy.stats import norm
 from scipy.stats import gamma
 from scipy import arange, array, exp
 
+from scipy.special import zeta
+
 from scipy.stats import binned_statistic
 
+import euler
 import random_matrices
 import qm
-
+import dirichlet
+import riemann_siegel
 
 
 mpl.rcParams['axes.linewidth'] = 5.0 #set the value globally
@@ -227,12 +231,13 @@ def plot_zeros_and_eigenvalue_differences():
 	plt.clf()
 
 
+
 # plot_zeros()
 
 # plot_normalized_differences()
 
 # plot_random_matrices_eigenvalues_differences()
 
-plot_GUE_eigenvalues_and_zeros_differences()
+# plot_GUE_eigenvalues_and_zeros_differences()
 
 # plot_zeros_and_eigenvalue_differences()

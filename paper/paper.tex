@@ -102,6 +102,7 @@
 \date{}
 
 \begin{abstract}
+In this paper, we explore three different algorithms to numerically calculate the non-trivial zeros of the Riemann Zeta function, $\zeta(t)$, namely, the Euler-Maclaurin method, alternating series method and the Riemann-Siegel formula. We then introduce random matrices and investigate any possible connection between their eigenvalues and the non-trivial zeros of $\zeta(t)$. We introduce the Hilbert-Polya conjecture as an alternate approach to proving the Riemann hypotheis. We investigate some of the properties of the eigenvalues of the Berry-Keating Hamiltonian.
 \end{abstract}
 
 
@@ -124,15 +125,15 @@ The Riemann Zeta function is a function of a complex variable $s$, that analytic
 \be
 \zeta(s) = \sum_{n = 1}^{\infty} \frac{1}{n^2} \;.
 \ee
-$\zeta(s)$ converges for $\mathrm{Re}(s) > 1$, so we'll always consider that case. It was first studied by Euler in 1740 but limited his study to only real, positive, integer values of $s$. Riemann later extended the function to complex valued $s$ in his 1859 paper ``On the Number of Primes Less Than a Given Magnitude''. There are multiple ways of defining $\zeta(t)$. It can, for example, also be defined as the integral,
+$\zeta(s)$ converges for $\mathrm{Re}(s) > 1$, so we will restrict ourself to that domain for this paper. The Zeta function was first studied by Euler in 1740 but his study was limited to real, positive, integer values of $s$ only. Riemann later extended the function to complex valued $s$ in his 1859 paper ``On the Number of Primes Less Than a Given Magnitude''. There are multiple ways of defining $\zeta(t)$. It can, for example, also be defined as the integral,
 \be
-\zeta(s) = \frac{1}{ \Gamma(s) } \int_0^{\infty} \frac{ x^{s -1} }{ e^x - 1} \df x \;.
+\zeta(s) = \frac{1}{ \Gamma(s) } \int_0^{\infty} \frac{ x^{s -1} }{ e^x - 1} \df x \;,
 \ee
-A particularly important form for the zeta funciton is it's Euler product formula, proved by Euler in 1737. It is,
+where $\Gamma(s) = \int_0^{\infty} x^{s - 1} e^{-x} \df x$. A particularly important represntation of the zeta is using the Euler product formula, 
 \be
 \zeta(s) = \prod_{\mathrm{p~prime}} \frac{1}{1 - p^{-s}}
 \ee
-It is important, for example, because it can be used to prove that there are infinitely many primes, using $s = 1$ in the above expression. In particular, note that for $s = 1$, it will be the case that,
+This form was proved by Euler in 1737 and is important, for example, because it can be used to prove that there are infinitely many primes. Consider the case when $s = 1$. Then,
 \begin{align*}
  1 &= \zeta(1) \left( 1 - \frac{1}{2} \right) \left( 1 - \frac{1}{3} \right) \left( 1 - \frac{1}{5} \right) \left( 1 - \frac{1}{7} \right) \ldots \\
  1 &= \zeta(1) \frac{1}{2} \cdot \frac{2}{3} \cdot \frac{4}{5} \cdot \frac{6}{7} \ldots \\
@@ -144,23 +145,31 @@ But, $\zeta(1) = 1 + \frac{1}{2} + \frac{1}{3} + \frac{1}{4} + \frac{1}{5} + \fr
 \end{equation*}
 But the left hand side of this equation diverges, which means the numerator in the right hand side diverges too, which means there must be infinitely many primes.  
 
-Another important form of the zeta function is the functional equation,
+Another important form of the zeta function is the functional equation, written as,
 \be
 \zeta(s) = 2^s \pi^{s - 1} \sin{ \left( \frac{\pi s}{2} \right) } \Gamma(1 - s) \zeta( 1 - s) \;.
 \ee
 
 \section{Numerical Determination of the Roots of the Zeta Function}
 \subsection{Euler-Maclaurin Formula}
-The Euler-Maclaurin formula is a very common and powerful tool used in numerical analysis as a connection between integrals and sums. It can be expressed to reformulate an integral as a sum (or vice versa) and is very popular in number theory to compute sums as integrals. It was developed in the early eighteenth century and came as a result of trying to extend the sum $\sum_{k} n^k$ for $k$'s other than 1. The formula is simply,
+The Euler-Maclaurin formula is a very popular tool used in numerical analysis as a connection between integrals and sums. It can be used to reformulate an integral as a sum or vice versa and is very popular in analytical number theory where it is used to compute sums in terms of integrals. The formula was developed in the early eighteenth century and came as a result of trying to extend the sum $\sum_{k} n^k$ for $k$'s other than 1. It was developed independently by Leonhard Euler and Colin Maclaurin around 1735- Euler to extend the sum just mentuoned and Maclaurin to compute integrals. The formula can be written as,
 
 \begin{align}
 \sum_{n = M}^{N} f(n) = &\int_M^N f(x) \df x + \frac{1}{2} \left[ f(N) - f(M) \right] + \\
 &\sum_{j = 1}^{\nu} \frac{B_{2j}}{ (2j)! } \left[ f^{( 2j - 1)}(N) - f^{(2j - 1)} (M) \right] + R
 \end{align}
 
-The remainder $R$ is very small for suitable values of $p$ and so we'll ignore it. \at{Maybe define the error term?}. 
+The remainder $R$ is given by, 
+\be 
+R_{2 \nu} = - \frac{ s (s + 1) \ldots (s + 2 \nu) }{ (2 \nu + 1)! } \int_N^{\infty} B_{2 \nu + 1}(x) x^{-s - 2\nu - 1} \df x \;.
+\ee
+It can be shown that R satisfies the inequality \cite{},
+\be
+\left| R_{2 \nu - 2} \right| \le \left| \frac{s + 2 \nu - 1}{ \mathrm{Re}(s) + 2\nu - 1 } \right|  \cdot \left| B_{2 \nu} \right| \;.
+\ee
+This means, if $B_{2 \nu}$ is the first term we ignore in our sum, the remainder will be at most $\left| \frac{s + 2 \nu - 1}{ \sigma + 2\nu - 1 } \right|  \cdot \left| B_{2 \nu} \right|$. 
 
-If we naively apply the Euler-Maclaurin formula to $\zeta(s) = \sum_{1}^{\infty} n^{-s}$, $R$ is not small enough to be ignored. So, we instead consider applying the formula to the sum, $\sum_{N}^{\infty} n^{-s}$. Notice that,
+If we apply the Euler-Maclaurin formula to $\zeta(s) = \sum_{1}^{\infty} n^{-s}$, $R$ will not be small enough to be ignored \cite{}. So, we instead apply the formula to the sum, $\sum_{N}^{\infty} n^{-s}$. Notice that,
 \begin{align*}
  \sum_{n = 1}^{\infty} n^{-s} - \sum_{n = 1}^{N - 1} n^{-s} &= \sum_{N}^{\infty} n^{-s} \\
  \zeta(s) - \sum_{n = 1}^{N - 1} n^{-s} &= \sum_{N}^{\infty} n^{-s} 
@@ -171,16 +180,29 @@ If we naively apply the Euler-Maclaurin formula to $\zeta(s) = \sum_{1}^{\infty}
 \zeta(s)  = \sum_{n = 1}^{N - 1} n^{-s} + \sum_{N}^{\infty} n^{-s} = \sum_{n = 1}^{N - 1} n^{-s} + \chi(s)
 \ee
 
-The first term is easy to compute and we can use the Euler-Maclaurin formula to compute $\chi(s)$. That gives us,
+The first term is easy to compute and we can use the Euler-Maclaurin formula to compute $\chi(s)$. Applying the formula, 
 
 \begin{align*}
 \chi(s) &= \int_N^{\infty} x^{-s} \df x + \frac{1}{2} N^{-s} + \sum_{j = 1}^{\nu} \frac{B_{2j}}{ (2j)! } \left[ - (n^{-s})^{(2j - 1)} (N) \right] + R \\
-& \approx \frac{1}{s - 1} N^{1 - s} \df x + \frac{1}{2} N^{-s} + \frac{B_2}{2} s N^{-s - 1} + \ldots + \left[ \frac{B_{2 \nu}}{ (2\nu)! } s(s + 1)  \ldots (s + 2 \nu - 2) N^{( -s - 2\nu + 1)} \right]
+& \approx \frac{1}{s - 1} N^{1 - s}  + \frac{1}{2} N^{-s} + \frac{B_2}{2} s N^{-s - 1} + \ldots + \left[ \frac{B_{2 \nu}}{ (2\nu)! } s(s + 1)  \ldots (s + 2 \nu - 2) N^{( -s - 2\nu + 1)} \right]
 \end{align*}
 
-This is the formula we're going to use to compute $\zeta(s)$. It contains two parts- one, calculating a regular sum and another that involves using Bernouli's numbers. This is very easy to implement and has been done in Section. \ref{}. The sum can therefore be divided into four different parts, defined as follows. This is what's used in the implementation in Section. \ref{}.
+The sum we need to calculate can be divided into four different parts, defined as follows:
+\begin{align*}
+ A &= \sum_{n = 1}^{N - 1} n^{-s} \\
+ B &= \frac{1}{s - 1} N^{1 - s} \\
+ C &= \frac{1}{2} N^{-s} \\
+ D &= \frac{B_2}{2} s N^{-s - 1} + \ldots + \left[ \frac{B_{2 \nu}}{ (2\nu)! } s(s + 1)  \ldots (s + 2 \nu - 2) N^{( -s - 2\nu + 1)} \right]
+\end{align*}
+Then, 
+\begin{equation*}
+ \zeta(s) \approx A + B + C + D \;,
+\end{equation*}
+with the error at most $\left| \frac{s + 2 \nu - 1}{ \mathrm{Re}(s) + 2\nu - 1 } \right|  \cdot \left| B_{2 \nu} \right|$. 
 
-\subsection{Alternating Series}
+This formula can be now used to compute $\zeta(s)$ and is very easy to implement. A sample implementation can be found in Section \ref{}. 
+
+\subsection{Alternating Series (Dirichlet Eta Function)}
 Consider the following sum:
 \be
 \label{eqn:alternating_series}
@@ -192,23 +214,29 @@ Comparing this to,
 \end{equation*}
 it's clear that,
 \be
+\label{eqn:dir_zeta}
 \eta(s) = \left( 1 - 2^{1 - s} \right) \zeta(s) \;.
 \ee
-$\eta(s)$ is called the Dirichlet eta function, sometimes also called the alternating zeta function as it's the same sum as zeta function except each terms alternates its sign. This means that if we can find a way to evaluate $\eta(s)$, we can evaluate $\zeta(s)$ using that. There are many representations of the $\eta$ function, but the one of particular interest to our purpose is to consider Euler's transformation of alternating series to the alternating series defined in Equation \ref{eqn:alternating_series}. The Euler transform is defined as,
+$\eta(s)$ is called the Dirichlet eta function, sometimes also called the alternating zeta function as it's the same sum as zeta function except the sign of the terms alternates between + and -. 
+
+Equation \ref{eqn:dir_zeta} means that if we can find a way to evaluate $\eta(s)$, we can evaluate $\zeta(s)$ using that. 
+
+Consider using Euler's transformation of alternating series to the series defined in Equation \ref{eqn:alternating_series} to accelerate its convergence. Euler's transform of alternating series is defined as,
 \be
+\label{eqn:euler_transform}
 \sum_{n = 0}^{\infty} (-1)^n a_n = \sum_{n = 0}^{\infty} (-1)^n a_0 \frac{ 1 }{2^{n + 1}} \Delta^n \;,
 \ee
-where $\Delta^n$ is the $n^{\mathrm{th}}$-order forward difference given by,
+where $\Delta^n$ is the $n^{\mathrm{th}}$-order forward difference of the function $f(x)$ given by,
 \begin{equation*}
  \Delta^n[f](x) = \sum_{k = 0}^{n} {n \choose k} (-1)^{n - k} f(x + k)
 \end{equation*}
-Comparing it to $\eta(s) = \sum_{n = 1}^{\infty} \frac{ (-1)^{n - 1} }{n^s} = \sum_{n = 0}^{\infty} \frac{ (-1)^n }{ (n + 1)^s }$, it's clear that,
+Comparing \ref{eqn:euler_transform} to $\eta(s) = \sum_{n = 1}^{\infty} \frac{ (-1)^{n - 1} }{n^s} = \sum_{n = 0}^{\infty} \frac{ (-1)^n }{ (n + 1)^s }$, it is clear that,
 \begin{align*}
 \eta(s) &= \sum_{n=0}^{\infty} (-1)^n 1^{-s} \frac{1}{ 2^{n + 1} } \Delta^n \\
         &= \sum_{n=0}^{\infty} (-1)^n 1^{-s} \frac{1}{ 2^{n + 1} } \sum_{k=0}^{n} {n \choose k} \frac{ (-1)^n }{ (-1)^k } \frac{1}{ (k + 1)^s } \\
         &= \sum_{n=0}^{\infty} \frac{1}{ 2^{n + 1} } \sum_{k=0}^{n} {n \choose k} \frac{ (-1)^k }{ (k + 1)^s }
 \end{align*}
-This sum converges much faster than the original sum and so, is much more efficient to calculate $\eta(s)$. The code that implements this can be found in Section. \ref{}. 
+This sum converges much faster than the original sum as it is exponential in $n$ and so, is much more efficient. A Python implementation that calculates this sum and uses it to calculate the Zeta function can be found in Section. \ref{}. 
 
 \subsection{Riemann-Siegel Formula}
 We won't consider the derivation of the Riemann-Siegel formula here but the formula can be expressed as,
@@ -255,7 +283,9 @@ So, the if the $i$-th coefficient of series expansion of a function $\Psi(x)$ is
 This means, once we calculate the seires coefficients of $C_0$, calculating the coefficients of other $C$'s does not take long. The code that does this can be found in Section. \ref{}. The code that implements the Riemann Siegel formula gives a choice between using exact coefficients or using a series coefficients. 
 
 \section{Root Finding}
-It's easy to see that the roots of $Z(t)$ are also the roots of $\zeta(t)$. We use a simple, binary-search algorithm to compute the roots, with a choice of any of the three algorithms discussed above to calculate $Z(t)$ / $\zeta(t)$. We select an interval and keep bisecting it until we find a bracket that's narrower than whatever precision we're calculating the roots to and inside which the real part of $z(t)$ changes sign. The first 100 roots are listed in Table. \ref{tab:first_100_roots}. If we take the roots of $\zeta(t)$ and compute the succesive differences and plot them, we get the plot in Fig. \ref{}.
+Now that we have three different ways to numerically compute $\zeta(t)$, it's very straightfoward to compute the zeros. We use a simple, binary-search algorithm to compute the roots, with a choice of any of the three algorithms discussed above to calculate $\zeta(t)$. We select an interval and keep bisecting it until we find an interval inside which the real part of $\zeta(t)$ changes sign, and that's narrower than whatever precision we're calculating the roots to. The first 100 roots are listed in Table \ref{tab:first_100_roots}. These were computed using the alternating series method. While the Riemann-Siegel formula is faster as it sums a smaller number of terms, for small $t$'s, it's not as accurate as the Euler-Maclaurin or alternating series method, particularly because we don't consider the full remainder $R$.
+
+If we take the roots of $\zeta(t)$ and compute the succesive differences and plot them, we get the plot in Figure \ref{fig:zeta_zeros_normalized_differences}. The sucessive differences have been normalized so that the mean is $1$.
 
 \begin{center}
   \begin{tabular}{ | l | c || l | l || r | r || r | r | }
@@ -296,23 +326,23 @@ It's easy to see that the roots of $Z(t)$ are also the roots of $\zeta(t)$. We u
 %    more than 75% of a page, the [p] option should be specified.
 \begin{figure}
 \includegraphics[width=\columnwidth]{figures/zeta_zeros_normalized_differences.pdf}
-\caption{text of caption}
-\label{}
+\caption{Distribution of successive differences of the first 2 million non-trivial zeros of $\zeta(t)$. The differences have been normalized so that the mean is 1.}
+\label{fig:zeta_zeros_normalized_differences}
 \end{figure}
 
 
 
 \section{Random Matrices}
-A random matrix is a matrix whose elements are random variables. Random matrices have interesting properties and are related to Riemann zeta function, in ways discussed below. Two most commonly studied types of random matrices are Gaussian Orthogonal Ensemble (GOE) and Gaussian Unitary Ensemble (GUE). 
+A random matrix is a matrix whose elements are random variables. Two most commonly studied types of random matrices are Gaussian Orthogonal Ensemble (GOE) and Gaussian Unitary Ensemble (GUE). 
 
 \subsection{Gaussian Orthogonal Enseblme (GOE)}
-A Gaussian Orthogonal Ensemble is a set of $n \times n$ real symmetric matrices $H$ whose Gaussian measure has the density, 
+A Gaussian Orthogonal Ensemble is a set of $n \times n$ real-valued symmetric matrices $H_n$ whose Gaussian measure has the density, 
 $$
 \frac{1}{Z_{\mathrm{GOE}}} e^{ - \frac{n}{4} \mathrm{tr}(H^2) } \;.
 $$
-This models Hamiltoninas with time-reversal symmetry. 
+GOEs model Hamiltonians with time-reversal symmetry. 
 
-Consider the ordered sequence of eigenvalues of $H$, $\lambda_1 < \lambda_2 < \ldots \lambda_{n - 1} < \lambda_n$. Define $s = \frac{\lambda_{i + 1} - \lambda_{i}}{ \left< s \right> }$. Then, the probability distribution on $s$, for GOEs, is given by, 
+Consider the ordered sequence of eigenvalues of $H_n$, $\lambda_1 < \lambda_2 < \ldots \lambda_{n - 1} < \lambda_n$. Define $s = \frac{\lambda_{i + 1} - \lambda_{i}}{ \left< s \right> }$. Then, the probability distribution on $s$ is given by, 
 $$
 p_{\mathrm{GOE}}(s) = \frac{\pi}{2} s e^{- \frac{\pi}{4} s^2 }
 $$
@@ -324,11 +354,11 @@ $$
 \end{figure}
 
 \subsection{Gaussian Unitary Enseblme (GUE)}
-A Gaussian Unitary Ensemble is a set of $n \times n$ Hermitian matrices $H$ whose Gaussian measure has the density, 
+A Gaussian Unitary Ensemble is a set of $n \times n$ Hermitian matrices $H_n$ whose Gaussian measure has the density, 
 $$
 \frac{1}{Z_{\mathrm{GUE}}} e^{ - \frac{n}{2} \mathrm{tr}(H^2) } \;,
 $$
-with $Z_{\mathrm{GUE}} = 2^{ \pi / 2} \pi^{n^2 / 2}$. GUEs models Hamiltoninas lacking time-reversal symmetry. 
+with $Z_{\mathrm{GUE}} = 2^{ \pi / 2} \pi^{n^2 / 2}$. GUEs model Hamiltonians lacking time-reversal symmetry. 
 
 For GUEs, the probability distribution on $s$, is given by, 
 $$
@@ -336,12 +366,14 @@ p_{\mathrm{GUE}}(s) = \frac{32}{\pi^2} s^2 e^{- \frac{4}{\pi} s^2 }
 $$
 
 \section{Riemann Hypothesis}
-The Riemann hypothesis is that blah blah. \at{Write this section.}
+The Riemann hypothesis conjectures that all non-trivial roots of the zeta function have real-part $1/2$. It was proposed by Riemann in 1859 in the same paper where he introduced the zeta funciton, ``On the Number of Primes Less Than a Given Magnitude''.
+
+The Riemann hypothesis is arguably one of the most important unsolved problems in mathematics. Several approaches to proving it has been attempted but none has succedded so far. Numerically, it has been tested to be true for the first $10^{13}$ roots by X. Gourdon and Patrick Demichel \cite{}. However, numerical verification, no matter to how large values of $t$, can not be considered to be a compelling argument for a mathematical hypothesis to be true. One notable example is related to Skewes' number where a related conjecture breaks down for the first time at a number around $10^{316}$. 
 
 \section{Hilbert-Polya Conjecture}
-The Hilbert-Polya conjecture suggests that the Riemann hypotheis would be true if the imaginary parts of the zeros of the zeta function corresponds to the eigenvalues of some unbounded Hermitian operator. This came out of  letter to Andrew Odlyzko, in 1982, in whiuch Polya said that he was aske by Edmund Landau for a physical reason why the Riemann hypotheis must be true. 
+The Hilbert-Polya conjecture suggests that the Riemann hypothesis would be true if the imaginary parts of the zeros of the zeta function correspond to the eigenvalues of some unbounded Hermitian operator. This came out of a letter to Andrew Odlyzko, in 1982, in which Polya wrote that he was asked by Edmund Landau for a physical reason why the Riemann hypothesis must be true, to which he proposed the conjecture. 
 
-The eigenvalues of a physical quantum operator are all real values and Hermitian operators are guaranteed to have real eigenvalues. This means, a physical way of proving the Riemann hypotheis would be to try to find a quantum mechanical operator whose eigenvalues (which will be all real) coincide with the imaginary parts of the non-trivial zeros of the Riemann zeta function. Finding any such quantum mechanical operator would be a proof of the Hilber-Polya conjecture and the Riemann hypotheis both. So in a sense, the Hilbert-Polya conjecture is just an alternate formulation of the Riemann hypothesis that makes it possible to try to find a physical proof of the Riemann hypotheis. 
+The eigenvalues of a physical quantum operator are all real values and Hermitian operators are guaranteed to have real eigenvalues. This means, a physical way of proving the Riemann hypothesis would be to try to find a quantum mechanical operator whose eigenvalues (which will be all real) coincide with the imaginary parts of the non-trivial zeros of the Riemann zeta function. Finding any such quantum mechanical operator would be a proof of the Hilber-Polya conjecture and the Riemann hypothesis both. So in a sense, the Hilbert-Polya conjecture is just an alternate formulation of the Riemann hypothesis that makes it possible to try to find a physical proof of the Riemann hypothesis. 
 
 
 It's important to note that there are infinitely many non-trivial zeros the $\zeta(t)$ \ref{} and so, if such a Hermitian matrix does exist, as conjectured by the Hilbert-Polya conjecture, that matrix would have to be infinite-dimensional. Of course, that's not a problem since most quantum mechanical operators, even the simplest ones like say the Hamiltonian corresponding the a simple harmonic oscillator, have matrix forms where the dimension is infinite-dimensional. But it's something that one needs to be aware of since, for example, because no numerical calculations can go until infinity, numerical methods of finding / testing such quantum systems must be careful, and certain properties, the most notable example being the commutation relationship, won't be valid when we arrest the matrix representation to a finite size for numerical computations. The first one of this will be particularly important in Section. \ref{} where we discuss one such possible quantum system. 
@@ -350,7 +382,7 @@ Very broadly speaking, there are now two approaches to prove the Riemann hypothe
 
 
 \section{$\zeta(t)$ and Random Matrices}
-If we're to prove the Riemann hypotheis, a careful study of the distribution of the non-trivial zeros of $\zeta(t)$ is crucial. In 1973, Montgomery conjectured that there mught be some possible connection between those non-trivial zeros and random matrices. Of particular interest is to study the distribution of successive differences of eigenvalues of the Gaussian Unitary Ensemble (GUE) and compare it to the successive differences of the non-trivial zeros of the zeta function. 
+If we're to prove the Riemann hypothesis, a careful study of the distribution of the non-trivial zeros of $\zeta(t)$ is crucial. In 1973, Montgomery conjectured that there mught be some possible connection between those non-trivial zeros and random matrices. Of particular interest is to study the distribution of successive differences of eigenvalues of the Gaussian Unitary Ensemble (GUE) and compare it to the successive differences of the non-trivial zeros of the zeta function. 
 
 It's interesting to note that the Gaussian Unitary Ensemble is a realization of every possible Hermitian matrices (assuming the ensemble size goes to infinity). But, through the Hilbert-Polya conjecture, there seems to be at least some connection between the eigenvalues of some such Hermitian matrix and the non-trivial zeros of the zeta function. 
 

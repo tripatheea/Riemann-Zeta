@@ -72,6 +72,9 @@ plt.rc('font', family='serif', size=43)
 
 
 
+
+
+
 def get_eigenvalues(n):
 	# Construct creation operator first.
 	a_creation = np.zeros((n, n))
@@ -98,10 +101,10 @@ def get_eigenvalue_differences(n):
 	
 	eigenvalues = get_eigenvalues(n)
 
-	print eigenvalues
+
 
 	normalized_differences = np.diff(eigenvalues)
-	# normalized_differences *= 1 / np.mean(normalized_differences)
+	normalized_differences *= 1 / np.mean(normalized_differences)
 
 	return normalized_differences
 
@@ -331,6 +334,8 @@ if __name__ == '__main__':
 	# plot_max_eigenvalue_diff_vs_N()
 	# plot_min_eigenvalue_vs_N()
 
-	plot_min_eigenvalues_differences_vs_N()
+	# plot_min_eigenvalues_differences_vs_N()
 
 	# plot_qm_eigenvalues()
+
+	pass
